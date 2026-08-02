@@ -28,6 +28,16 @@ components:
         isGuest: { type: boolean }
         createdAt: { type: string, format: date-time }
 
+    PublicUser:
+      description: Redacted user projection for contexts visible to anonymous viewers of a public trip - omits email
+      type: object
+      required: [id, displayName, avatarUrl, isGuest]
+      properties:
+        id: { type: string, format: uuid }
+        displayName: { type: string }
+        avatarUrl: { type: [string, "null"] }
+        isGuest: { type: boolean }
+
     Trip:
       type: object
       required:
@@ -63,7 +73,7 @@ components:
         tripId: { type: string, format: uuid }
         role: { type: string, enum: [owner, editor, viewer] }
         joinedAt: { type: string, format: date-time }
-        user: { $ref: "#/components/schemas/User" }
+        user: { $ref: "#/components/schemas/PublicUser" }
 
     CodeInvite:
       type: object
@@ -555,8 +565,44 @@ paths:
         "500": { $ref: "#/components/responses/InternalServerError" }
     delete:
       tags: [trips]
+      summary: Remove a member - the owner cannot be removed, transfer ownership first
       responses:
         "204": { description: Member removed }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Cannot remove the trip's owner - transfer ownership first
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /trips/{tripID}/transfer-ownership:
+    parameters:
+      - in: path
+        name: tripID
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [trips]
+      summary: Owner transfers ownership to an existing member - the previous owner becomes an editor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newOwnerId]
+              properties:
+                newOwnerId: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Ownership transferred - returns the new owner's membership
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TripMember" }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
