@@ -66,7 +66,7 @@ CREATE TABLE trip_access_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     trip_id UUID NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    role TEXT NOT NULL DEFAULT 'editor', -- viewer | editor
+    role TEXT NOT NULL DEFAULT 'viewer', -- viewer | editor
     status TEXT NOT NULL DEFAULT 'pending', -- pending | accepted | rejected
     resolved_by UUID REFERENCES users (id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

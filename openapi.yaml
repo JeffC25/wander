@@ -19,40 +19,46 @@ components:
   schemas:
     User:
       type: object
+      required: [id, email, displayName, avatarUrl, isGuest, createdAt]
       properties:
         id: { type: string, format: uuid }
-        email: { type: string, format: email, nullable: true }
+        email: { type: [string, "null"], format: email }
         displayName: { type: string }
-        avatarUrl: { type: string, nullable: true }
+        avatarUrl: { type: [string, "null"] }
         isGuest: { type: boolean }
         createdAt: { type: string, format: date-time }
 
     Trip:
       type: object
+      required:
+        [id, name, notes, visibility, startDate, endDate, createdBy, createdAt]
       properties:
         id: { type: string, format: uuid }
         name: { type: string }
-        notes: { type: string, nullable: true }
+        notes: { type: [string, "null"] }
         visibility: { type: string, enum: [private, public] }
-        startDate: { type: string, format: date, nullable: true }
-        endDate: { type: string, format: date, nullable: true }
+        startDate: { type: [string, "null"], format: date }
+        endDate: { type: [string, "null"], format: date }
         createdBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
 
     TripAccessRequest:
       type: object
+      required:
+        [id, tripId, role, status, resolvedBy, createdAt, resolvedAt, user]
       properties:
         id: { type: string, format: uuid }
         tripId: { type: string, format: uuid }
-        role: { type: string, enum: [viewer, editor] }
+        role: { type: string, enum: [viewer, editor], default: viewer }
         status: { type: string, enum: [pending, accepted, rejected] }
-        resolvedBy: { type: string, format: uuid, nullable: true }
+        resolvedBy: { type: [string, "null"], format: uuid }
         createdAt: { type: string, format: date-time }
-        resolvedAt: { type: string, format: date-time, nullable: true }
+        resolvedAt: { type: [string, "null"], format: date-time }
         user: { $ref: "#/components/schemas/User" }
 
     TripMember:
       type: object
+      required: [tripId, role, joinedAt, user]
       properties:
         tripId: { type: string, format: uuid }
         role: { type: string, enum: [owner, editor, viewer] }
@@ -61,72 +67,125 @@ components:
 
     CodeInvite:
       type: object
+      required:
+        [
+          id,
+          tripId,
+          code,
+          createdBy,
+          role,
+          maxUses,
+          useCount,
+          expiresAt,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         tripId: { type: string, format: uuid }
         code: { type: string }
         createdBy: { type: string, format: uuid }
-        role: { type: string, enum: [viewer, editor] }
-        maxUses: { type: integer, nullable: true }
+        role: { type: string, enum: [viewer, editor], default: viewer }
+        maxUses: { type: [integer, "null"] }
         useCount: { type: integer }
-        expiresAt: { type: string, format: date-time, nullable: true }
+        expiresAt: { type: [string, "null"], format: date-time }
         createdAt: { type: string, format: date-time }
 
     DirectedInvite:
       type: object
+      required: [id, tripId, userId, createdBy, role, expiresAt, createdAt]
       properties:
         id: { type: string, format: uuid }
         tripId: { type: string, format: uuid }
         userId: { type: string, format: uuid }
         createdBy: { type: string, format: uuid }
-        role: { type: string, enum: [viewer, editor] }
-        expiresAt: { type: string, format: date-time, nullable: true }
+        role: { type: string, enum: [viewer, editor], default: viewer }
+        expiresAt: { type: [string, "null"], format: date-time }
         createdAt: { type: string, format: date-time }
 
     Destination:
       type: object
+      required:
+        [
+          id,
+          tripId,
+          name,
+          notes,
+          lat,
+          long,
+          position,
+          startsAt,
+          endsAt,
+          createdBy,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         tripId: { type: string, format: uuid }
         name: { type: string }
-        notes: { type: string, nullable: true }
-        lat: { type: number, nullable: true }
-        long: { type: number, nullable: true }
+        notes: { type: [string, "null"] }
+        lat: { type: [number, "null"] }
+        long: { type: [number, "null"] }
         position: { type: integer }
-        startsAt: { type: string, format: date-time, nullable: true }
-        endsAt: { type: string, format: date-time, nullable: true }
+        startsAt: { type: [string, "null"], format: date-time }
+        endsAt: { type: [string, "null"], format: date-time }
         createdBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
 
     ItineraryItem:
       type: object
+      required:
+        [
+          id,
+          destinationId,
+          title,
+          notes,
+          startsAt,
+          endsAt,
+          position,
+          createdBy,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         destinationId: { type: string, format: uuid }
         title: { type: string }
-        notes: { type: string, nullable: true }
-        startsAt: { type: string, format: date-time, nullable: true }
-        endsAt: { type: string, format: date-time, nullable: true }
+        notes: { type: [string, "null"] }
+        startsAt: { type: [string, "null"], format: date-time }
+        endsAt: { type: [string, "null"], format: date-time }
         position: { type: integer }
         createdBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
 
     Leg:
       type: object
+      required:
+        [
+          id,
+          tripId,
+          fromDestinationId,
+          toDestinationId,
+          name,
+          notes,
+          distance,
+          cost,
+          createdBy,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         tripId: { type: string, format: uuid }
         fromDestinationId: { type: string, format: uuid }
         toDestinationId: { type: string, format: uuid }
         name: { type: string }
-        notes: { type: string, nullable: true }
-        distance: { type: number, nullable: true }
-        cost: { type: number, nullable: true }
+        notes: { type: [string, "null"] }
+        distance: { type: [number, "null"] }
+        cost: { type: [number, "null"] }
         createdBy: { type: string, format: uuid }
         createdAt: { type: string, format: date-time }
 
     OptimizeResult:
       type: object
+      required: [orderedIds, skippedIds, suggestedLegs]
       properties:
         orderedIds:
           type: array
@@ -138,6 +197,7 @@ components:
           type: array
           items:
             type: object
+            required: [fromDestinationId, toDestinationId, distance]
             properties:
               fromDestinationId: { type: string, format: uuid }
               toDestinationId: { type: string, format: uuid }
@@ -145,6 +205,7 @@ components:
 
     GeocodeResult:
       type: object
+      required: [lat, long, name]
       properties:
         lat: { type: number }
         long: { type: number }
@@ -152,12 +213,14 @@ components:
 
     AuthTokens:
       type: object
+      required: [accessToken, refreshToken]
       properties:
         accessToken: { type: string }
         refreshToken: { type: string }
 
     Error:
       type: object
+      required: [error]
       properties:
         error: { type: string }
 
@@ -253,6 +316,7 @@ paths:
   /auth/logout:
     post:
       tags: [auth]
+      security: []
       requestBody:
         required: true
         content:
@@ -528,7 +592,8 @@ paths:
             schema:
               type: object
               properties:
-                role: { type: string, enum: [viewer, editor] }
+                role:
+                  { type: string, enum: [viewer, editor], default: viewer }
                 maxUses: { type: integer }
                 expiresAt: { type: string, format: date-time }
       responses:
@@ -615,7 +680,8 @@ paths:
               required: [email]
               properties:
                 email: { type: string, format: email }
-                role: { type: string, enum: [viewer, editor] }
+                role:
+                  { type: string, enum: [viewer, editor], default: viewer }
                 expiresAt: { type: string, format: date-time }
       responses:
         "201":
@@ -704,7 +770,8 @@ paths:
             schema:
               type: object
               properties:
-                role: { type: string, enum: [viewer, editor] }
+                role:
+                  { type: string, enum: [viewer, editor], default: viewer }
       responses:
         "201":
           description: Access request created
