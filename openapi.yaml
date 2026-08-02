@@ -44,6 +44,7 @@ components:
         [id, name, notes, visibility, startDate, endDate, createdBy, createdAt]
       properties:
         id: { type: string, format: uuid }
+        ownerId: { type: string, format: uuid }
         name: { type: string }
         notes: { type: [string, "null"] }
         visibility: { type: string, enum: [private, public] }
@@ -71,7 +72,7 @@ components:
       required: [tripId, role, joinedAt, user]
       properties:
         tripId: { type: string, format: uuid }
-        role: { type: string, enum: [owner, editor, viewer] }
+        role: { type: string, enum: [editor, viewer] }
         joinedAt: { type: string, format: date-time }
         user: { $ref: "#/components/schemas/PublicUser" }
 
