@@ -41,7 +41,17 @@ components:
     Trip:
       type: object
       required:
-        [id, name, notes, visibility, startDate, endDate, createdBy, createdAt]
+        [
+          id,
+          ownerId,
+          name,
+          notes,
+          visibility,
+          startDate,
+          endDate,
+          createdBy,
+          createdAt,
+        ]
       properties:
         id: { type: string, format: uuid }
         ownerId: { type: string, format: uuid }
@@ -72,7 +82,10 @@ components:
       required: [tripId, role, joinedAt, user]
       properties:
         tripId: { type: string, format: uuid }
-        role: { type: string, enum: [editor, viewer] }
+        role:
+          type: string
+          enum: [owner, editor, viewer]
+          description: Response-only, "owner" derived from trips.owner_id. Request bodies only accept "viewer" or "editor".
         joinedAt: { type: string, format: date-time }
         user: { $ref: "#/components/schemas/PublicUser" }
 
@@ -639,8 +652,7 @@ paths:
             schema:
               type: object
               properties:
-                role:
-                  { type: string, enum: [viewer, editor], default: viewer }
+                role: { type: string, enum: [viewer, editor], default: viewer }
                 maxUses: { type: integer }
                 expiresAt: { type: string, format: date-time }
       responses:
@@ -727,8 +739,7 @@ paths:
               required: [email]
               properties:
                 email: { type: string, format: email }
-                role:
-                  { type: string, enum: [viewer, editor], default: viewer }
+                role: { type: string, enum: [viewer, editor], default: viewer }
                 expiresAt: { type: string, format: date-time }
       responses:
         "201":
@@ -817,8 +828,7 @@ paths:
             schema:
               type: object
               properties:
-                role:
-                  { type: string, enum: [viewer, editor], default: viewer }
+                role: { type: string, enum: [viewer, editor], default: viewer }
       responses:
         "201":
           description: Access request created
