@@ -1,4 +1,4 @@
-module github.com/JeffC25/wander-graph
+module github.com/JeffC25/wander
 
 go 1.26.2
 
