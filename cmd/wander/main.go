@@ -5,43 +5,53 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 
 	"github.com/JeffC25/wander/config"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5/pgxpool"
+	wander "github.com/JeffC25/wander/internal"
+	"golang.org/x/sync/errgroup"
 )
 
+var configPath = flag.String("config", "config.yaml", "server config file")
+
 func main() {
-	cfgPath := flag.String("config", "config.yaml", "server config file")
+	// MARK: Config
+	notifyCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	eg, ctx := errgroup.WithContext(notifyCtx)
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: wander --config <config path>")
 	}
 	flag.Parse()
 
-	cfg, err := config.GetConfig(*cfgPath)
+	cfg, err := config.GetConfig(*configPath)
 	if err != nil {
 		log.Fatalf("unable to load config: %v", err)
 	}
 
-	pool, err := pgxpool.New(context.Background(), cfg.Database.URL)
-	if err != nil {
-		log.Fatalf("unable to connect to database: %v", err)
-	}
-	defer pool.Close()
+	// MARK: DB
+	// pool, err := pgxpool.New(context.Background(), cfg.Database.URL)
+	// if err != nil {
+	// 	log.Fatalf("unable to connect to database: %v", err)
+	// }
+	// defer pool.Close()
+	//
+	// if err := pool.Ping(context.Background()); err != nil {
+	// 	log.Fatalf("database ping failed: %v", err)
+	// }
 
-	if err := pool.Ping(context.Background()); err != nil {
-		log.Fatalf("database ping failed: %v", err)
-	}
-
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Timeout(30 * time.Second))
-
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
+	// MARK: Run server
+	s := wander.Server{}
+	eg.Go(func() error {
+		return s.Run(ctx, cfg.Server)
 	})
+
+	// MARK: Handle error group
+	err = eg.Wait()
+	if err != nil {
+		log.Printf("an error occurred: %v", err)
+	}
 }

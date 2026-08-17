@@ -5,5 +5,6 @@
 	"dataTypeCase": "upper",
 	"functionCase": "preserve",
 	"identifierCase": "preserve",
-	"linesBetweenQueries": 1
+	"linesBetweenQueries": 1,
+	"expressionWidth": 144
 }
