@@ -8,9 +8,9 @@ import (
 )
 
 type Config struct {
-	ServerConfig `yaml:"server"`
-	LogConfig    `yaml:"log"`
-	DBConfig     `yaml:"database"`
+	Server   ServerConfig `yaml:"server"`
+	Log      LogConfig    `yaml:"log"`
+	Database DBConfig     `yaml:"database"`
 }
 
 type ServerConfig struct {
@@ -27,11 +27,7 @@ type LogConfig struct {
 	Pretty bool `yaml:"pretty"`
 }
 
-func GetConfig(filePath string) (Config, error) {
-	fp := "config.yaml"
-	if filePath != "" {
-		fp = filePath
-	}
+func GetConfig(fp string) (Config, error) {
 	b, err := os.ReadFile(fp)
 	if err != nil {
 		return Config{}, fmt.Errorf("could not find config file: %v", err)
