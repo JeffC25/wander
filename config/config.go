@@ -18,13 +18,13 @@ type ServerConfig struct {
 	CorsAllowedOrigins []string `yaml:"corsAllowedOrigins"`
 }
 
-type DBConfig struct {
-	URL string `yaml:"url"`
-}
-
 type LogConfig struct {
 	Level  int8 `yaml:"level"`
 	Pretty bool `yaml:"pretty"`
+}
+
+type DBConfig struct {
+	URL string `yaml:"url"`
 }
 
 func GetConfig(fp string) (Config, error) {
