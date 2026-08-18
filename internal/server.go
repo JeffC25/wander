@@ -2,6 +2,9 @@ package wander
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,5 +24,27 @@ func (s *Server) Run(ctx context.Context, c config.ServerConfig) error {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	return nil
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", c.Port),
+		Handler: r,
+	}
+
+	errC := make(chan error, 1)
+	go func() {
+		<-ctx.Done()
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		errC <- server.Shutdown(shutdownCtx)
+	}()
+
+	log.Printf("listening on port %d", c.Port)
+
+	err := server.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		return nil
+	}
+
+	return <-errC
 }

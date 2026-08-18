@@ -29,20 +29,16 @@ func main() {
 
 	cfg, err := config.GetConfig(*configPath)
 	if err != nil {
-		log.Fatalf("unable to load config: %v", err)
+		log.Fatalf("failed to load config: %v", err)
 	}
 
-	// MARK: DB
-	// pool, err := pgxpool.New(context.Background(), cfg.Database.URL)
+	// MARK: Open database
+	// pool, err := db.Open(cfg.Database)
 	// if err != nil {
-	// 	log.Fatalf("unable to connect to database: %v", err)
+	// 	log.Fatalf("failed to open database connection: %v", err)
 	// }
 	// defer pool.Close()
 	//
-	// if err := pool.Ping(context.Background()); err != nil {
-	// 	log.Fatalf("database ping failed: %v", err)
-	// }
-
 	// MARK: Run server
 	s := wander.Server{}
 	eg.Go(func() error {
@@ -50,8 +46,7 @@ func main() {
 	})
 
 	// MARK: Handle error group
-	err = eg.Wait()
-	if err != nil {
+	if err = eg.Wait(); err != nil {
 		log.Printf("an error occurred: %v", err)
 	}
 }
